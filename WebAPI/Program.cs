@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.AzureKeyVault;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
@@ -27,7 +28,11 @@ namespace WebAPI
                         var keyVaultClientId = settings["KeyVaultConfiguration:ClientId"];
                         var keyVaultClientSecret = settings["KeyVaultConfiguration:ClientSecret"];
                         config.AddAzureKeyVault(keyVaultURL, keyVaultClientId, keyVaultClientSecret, new DefaultKeyVaultSecretManager());
-                    });
+                    }).ConfigureAppConfiguration((hostingContext, config) =>
+                    {
+                        var appInsightsKey = hostingContext.Configuration["ApplicationInsights:InstrumentationKey"];
+                        config.AddApplicationInsightsSettings(instrumentationKey: appInsightsKey);
+                    }); ;
                     webBuilder.UseStartup<Startup>();
                 });
     }
